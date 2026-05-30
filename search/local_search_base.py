@@ -35,22 +35,34 @@ class LocalSearchBase:
         return []
 
     def _is_position_valid(self, position):
+        try:
+            x, y = position
+        except (TypeError, ValueError):
+            return False
+
         if hasattr(self.world, "is_position_valid"):
-            return self.world.is_position_valid(position)
+            try:
+                return self.world.is_position_valid(position)
+            except TypeError:
+                return self.world.is_position_valid(x, y)
 
         if hasattr(self.world, "position_valid_is"):
-            return self.world.position_valid_is(position)
+            try:
+                return self.world.position_valid_is(position)
+            except TypeError:
+                return self.world.position_valid_is(x, y)
 
         if hasattr(self.world, "is_valid_position"):
-            return self.world.is_valid_position(position)
+            try:
+                return self.world.is_valid_position(position)
+            except TypeError:
+                return self.world.is_valid_position(x, y)
 
         rows = self._get_rows()
         cols = self._get_cols()
 
         if rows is None or cols is None:
             return False
-
-        x, y = position
 
         if x < 0 or x >= rows or y < 0 or y >= cols:
             return False
@@ -60,7 +72,6 @@ class LocalSearchBase:
                 return False
 
         return True
-
     def _random_valid_position(self):
         if hasattr(self.world, "random_position"):
             return self.world.random_position()
