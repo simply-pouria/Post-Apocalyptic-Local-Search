@@ -37,7 +37,7 @@ class SimulatedAnnealing(LocalSearchBase):
         max_iterations = int(kwargs.get("max_iterations", self.DEFAULT_MAX_ITER))
         max_no_improve = int(kwargs.get("max_no_improve", self.DEFAULT_MAX_NO_IMPROVE))
 
-        # ---- Initialise current state --------------------------------- #
+        # ---- Initialise current state ---- #
         current_state = list(initial_state) if initial_state is not None else self.initialize_state()
         current_cost = self.evaluate(current_state)
 
@@ -49,6 +49,40 @@ class SimulatedAnnealing(LocalSearchBase):
 
         T = T0
         no_improve_count = 0
+        
+        for t in range(1, max_iterations + 1):
+            T= T0 * (alpha ** t)
+            if T < T_min:
+                break
+
+            neighbor =self.get_neighbor(current_state)
+            neighbor_cost =self.evaluate(neighbor)
+
+            dE = current_cost - neighbor_cost
+
+            if dE > 0:
+                current_state =list(neighbor)
+                current_cost =neighbor_cost
+                no_improve_count = 0
+                
+                if current_cost < best_cost:
+                    best_cost = current_cost
+                    best_state = list(current_state)
+            
+            else:
+                acceptance_probability = math.exp(dE / T)   
+                if random.random() < acceptance_probability:
+                    current_state =list(neighbor)
+                    current_cost = neighbor_cost
+                   
+                no_improve_count += 1
+
+            evaluations.append(current_cost)
+            states_history.append(list(current_state))
+
+            
+            if no_improve_count >= max_no_improve:
+                break
 
         
-        raise NotImplementedError("Students must implement this method.")
+        return best_state, best_cost, evaluations, states_history
