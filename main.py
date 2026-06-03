@@ -11,6 +11,7 @@ from env.grid_world import GridWorld
 from search.hill_climbing import HillClimbing
 from search.simulated_annealing import SimulatedAnnealing
 from search.beam_search import BeamSearch
+from search.genetic_algorithm import GeneticAlgorithm
 from search.tabu_search import TabuSearch
 from utils import represent
 
@@ -66,6 +67,7 @@ if __name__ == "__main__":
     algorithm_classes = [
         HillClimbing,
         SimulatedAnnealing,
+        GeneticAlgorithm,
         TabuSearch,
         BeamSearch
     ]
