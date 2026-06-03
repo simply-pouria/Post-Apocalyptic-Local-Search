@@ -11,11 +11,44 @@ class GeneticAlgorithm(LocalSearchBase):
     DEFAULT_MAX_NO_IMPROVE = 100
 
     def _encode(self, state):
-        max_sensors = self._get_max_sensors()
-        chrom = list(state[:max_sensors])
+        max_sensors =self._get_max_sensors()
+        chrom =list(state[:max_sensors])
         while len(chrom) < max_sensors:
             chrom.append(None)
         return chrom
 
     def _decode(self, chrom):
         return [pos for pos in chrom if pos is not None]
+
+    def _repair(self, chrom):
+        max_sensors =self._get_max_sensors()
+        seen =set()
+        valid =[]
+        for pos in chrom:
+            if pos is None:
+                continue
+            pos =tuple(pos)
+            if pos in seen:
+                continue
+            if not self._is_position_valid(pos):
+                continue
+            valid.append(pos)
+            seen.add(pos)
+            if len(valid) >= max_sensors:
+                break
+        while len(valid) < max_sensors:
+            valid.append(None)
+        return valid
+
+    def _create_individual(self):
+        """Create a random valid individual (encoded chromosome)."""
+        state = self.initialize_state()
+        return self._encode(state)
+
+    def _init_population(self, initial_state, pop_size):
+        population =[]
+        if initial_state is not None:
+            population.append(self._encode(initial_state))
+        while len(population) < pop_size:
+            population.append(self._create_individual())
+        return population
