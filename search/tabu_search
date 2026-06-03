@@ -64,3 +64,66 @@ class TabuSearch(LocalSearchBase):
         tabu_list: dict ={}
         no_improve_count =0
         no_improve_restart_count =0
+
+        for iteration in range(1, max_iterations + 1):
+
+            expired =[key for key, expiry in tabu_list.items() if expiry <= iteration]
+            for key in expired:
+                del tabu_list[key]
+
+
+            neighbours =self._generate_neighbours(current_state, neighbors_per_iter)
+
+            best_candidate = None
+            best_candidate_cost = float("inf")
+            best_candidate_move = None
+
+            for nb in neighbours:
+                nb_cost =self.evaluate(nb)
+                move_key =self._move_key(current_state, nb)
+
+                is_tabu =move_key in tabu_list
+
+                aspiration =nb_cost < best_cost
+
+                if (not is_tabu) or aspiration:
+                    if nb_cost < best_candidate_cost:
+                        best_candidate = nb
+                        best_candidate_cost = nb_cost
+                        best_candidate_move = move_key
+
+            if best_candidate is None:
+                evaluations.append(current_cost)
+                states_history.append(list(current_state))
+                no_improve_count += 1
+                no_improve_restart_count += 1
+            else:
+                current_state = list(best_candidate)
+                current_cost  = best_candidate_cost
+
+                # Add move to tabu list
+                if best_candidate_move is not None:
+                    tabu_list[best_candidate_move] = iteration + tabu_tenure
+
+                if current_cost < best_cost:
+                    best_cost  = current_cost
+                    best_state = list(current_state)
+                    no_improve_count         = 0
+                    no_improve_restart_count = 0
+                else:
+                    no_improve_count         += 1
+                    no_improve_restart_count += 1
+
+                evaluations.append(current_cost)
+                states_history.append(list(current_state))
+
+            if no_improve_restart_count >= max_no_improve_restart:
+                current_state = self.initialize_state()
+                current_cost  = self.evaluate(current_state)
+                tabu_list.clear()
+                no_improve_restart_count = 0
+
+            if no_improve_count >= max_no_improve:
+                break
+
+        return best_state, best_cost, evaluations, states_history
