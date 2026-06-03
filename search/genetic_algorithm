@@ -110,4 +110,70 @@ class GeneticAlgorithm(LocalSearchBase):
 
         return self._repair(new_chrom)
 
+    def run(self, initial_state, **kwargs):
+
+        pop_size = int(kwargs.get("pop_size",        self.DEFAULT_POP_SIZE))
+        max_generations =int(kwargs.get("max_generations", self.DEFAULT_MAX_GEN))
+        crossover_rate =float(kwargs.get("crossover_rate",  self.DEFAULT_CROSSOVER_RATE))
+        mutation_rate =float(kwargs.get("mutation_rate",   self.DEFAULT_MUTATION_RATE))
+        tournament_size =int(kwargs.get("tournament_size", self.DEFAULT_TOURNAMENT_SIZE))
+        elitism_count =int(kwargs.get("elitism_count",   self.DEFAULT_ELITISM_COUNT))
+        max_no_improve =int(kwargs.get("max_no_improve",  self.DEFAULT_MAX_NO_IMPROVE))
+
+        population =self._init_population(initial_state, pop_size)
+        fitness =[self.evaluate(self._decode(chrom)) for chrom in population]
+
+        best_idx   =min(range(pop_size), key=lambda i: fitness[i])
+        best_state =list(self._decode(population[best_idx]))
+        best_cost  =fitness[best_idx]
+
+        evaluations:    list =[best_cost]
+        states_history: list =[list(best_state)]
+        no_improve_count =0
+        
+        for _gen in range(max_generations):
+            
+            sorted_indices =sorted(range(pop_size), key=lambda i: fitness[i])
+            new_population =[list(population[i]) for i in sorted_indices[:elitism_count]]
+            new_fitness =[fitness[i] for i in sorted_indices[:elitism_count]]
+
+            while len(new_population) < pop_size:
+                parent_a =self._tournament_select(population, fitness, tournament_size)
+                parent_b =self._tournament_select(population, fitness, tournament_size)
+
+                if random.random() < crossover_rate:
+                    child_a, child_b =self._uniform_crossover(parent_a, parent_b)
+                else:
+                    child_a, child_b =list(parent_a), list(parent_b)
+
+                child_a =self._mutate(child_a, mutation_rate)
+                child_b =self._mutate(child_b, mutation_rate)
+
+                for child in (child_a, child_b):
+                    if len(new_population) < pop_size:
+                        decoded = self._decode(child)
+                        new_population.append(child)
+                        new_fitness.append(self.evaluate(decoded))
+
+            population =new_population
+            fitness =new_fitness
+
+            gen_best_idx =min(range(pop_size), key=lambda i: fitness[i])
+            gen_best_cost =fitness[gen_best_idx]
+            gen_best_state =list(self._decode(population[gen_best_idx]))
+
+            if gen_best_cost < best_cost:
+                best_cost =gen_best_cost
+                best_state =gen_best_state
+                no_improve_count =0
+            else:
+                no_improve_count += 1
+
+            evaluations.append(best_cost)
+            states_history.append(list(best_state))
+
+            if no_improve_count >= max_no_improve:
+                break
+
+        return best_state, best_cost, evaluations, states_history
 
