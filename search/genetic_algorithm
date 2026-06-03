@@ -72,8 +72,8 @@ class GeneticAlgorithm(LocalSearchBase):
         if random.random() > mutation_rate:
             return chrom
 
-        filled_indices =[i for i, pos in enumerate(chrom) if pos is not None]
-        empty_indices  =[i for i, pos in enumerate(chrom) if pos is None]
+        filled_indices = [i for i, pos in enumerate(chrom) if pos is not None]
+        empty_indices  = [i for i, pos in enumerate(chrom) if pos is None]
 
         ops =[]
         if filled_indices:
@@ -87,8 +87,8 @@ class GeneticAlgorithm(LocalSearchBase):
         new_chrom =list(chrom)
 
         if op == "move":
-            idx =random.choice(filled_indices)
-            occupied =set(pos for pos in new_chrom if pos is not None)
+            idx = random.choice(filled_indices)
+            occupied = set(pos for pos in new_chrom if pos is not None)
             for _ in range(100):
                 new_pos =tuple(self._random_valid_position())
                 if new_pos not in occupied:
@@ -97,7 +97,7 @@ class GeneticAlgorithm(LocalSearchBase):
 
         elif op == "add":
             idx =random.choice(empty_indices)
-            occupied =set(pos for pos in new_chrom if pos is not None)
+            occupied = set(pos for pos in new_chrom if pos is not None)
             for _ in range(100):
                 new_pos =tuple(self._random_valid_position())
                 if new_pos not in occupied:
@@ -105,7 +105,7 @@ class GeneticAlgorithm(LocalSearchBase):
                     break
 
         elif op == "remove":
-            idx =random.choice(filled_indices)
+            idx = random.choice(filled_indices)
             new_chrom[idx] =None
 
         return self._repair(new_chrom)
