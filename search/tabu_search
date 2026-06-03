@@ -1,0 +1,45 @@
+from search.local_search_base import LocalSearchBase
+
+
+class TabuSearch(LocalSearchBase):
+
+    DEFAULT_MAX_ITER =1000
+    DEFAULT_TABU_TENURE =15         
+    DEFAULT_NEIGHBORS_PER_ITER =20   
+    DEFAULT_MAX_NO_IMPROVE =200     
+    DEFAULT_MAX_NO_IMPROVE_RESTART =50 
+
+    @staticmethod
+    def _move_key(old_state, new_state):
+        old_set =set(tuple(p) for p in old_state)
+        new_set =set(tuple(p) for p in new_state)
+        added   =new_set - old_set
+        removed =old_set - new_set
+
+        if added and removed:
+            old_pos = min(removed) 
+            new_pos = min(added)
+            return ("move", (old_pos, new_pos))
+        elif added:
+            return ("add", min(added))
+        elif removed:
+            return ("remove", min(removed))
+        else:
+            return ("noop", ())
+
+    def _generate_neighbours(self, state, n):
+        neighbours =[]
+        state_key =tuple(sorted(tuple(p) for p in state))
+        seen_keys ={state_key}
+
+        for _ in range(n * 5):   
+            if len(neighbours) >= n:
+                break
+            nb =self.get_neighbor(state)
+            nb_key =
+tuple(sorted(tuple(p) for p in nb))
+            if nb_key not in seen_keys:
+                seen_keys.add(nb_key)
+                neighbours.append(nb)
+
+        return neighbours
