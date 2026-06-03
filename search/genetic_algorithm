@@ -41,7 +41,6 @@ class GeneticAlgorithm(LocalSearchBase):
         return valid
 
     def _create_individual(self):
-        """Create a random valid individual (encoded chromosome)."""
         state = self.initialize_state()
         return self._encode(state)
 
@@ -52,3 +51,63 @@ class GeneticAlgorithm(LocalSearchBase):
         while len(population) < pop_size:
             population.append(self._create_individual())
         return population
+
+    def _tournament_select(self, population, fitness, tournament_size):
+        contestants =random.sample(range(len(population)), min(tournament_size, len(population)))
+        winner = min(contestants, key=lambda i: fitness[i])
+        return population[winner]
+
+    def _uniform_crossover(self, parent_a, parent_b):
+        child_a, child_b = [], []
+        for gene_a, gene_b in zip(parent_a, parent_b):
+            if random.random() < 0.5:
+                child_a.append(gene_a)
+                child_b.append(gene_b)
+            else:
+                child_a.append(gene_b)
+                child_b.append(gene_a)
+        return self._repair(child_a), self._repair(child_b)
+
+    def _mutate(self, chrom, mutation_rate):
+        if random.random() > mutation_rate:
+            return chrom
+
+        filled_indices =[i for i, pos in enumerate(chrom) if pos is not None]
+        empty_indices  =[i for i, pos in enumerate(chrom) if pos is None]
+
+        ops =[]
+        if filled_indices:
+            ops += ["move", "remove"]
+        if empty_indices:
+            ops.append("add")
+        if not ops:
+            return chrom
+
+        op =random.choice(ops)
+        new_chrom =list(chrom)
+
+        if op == "move":
+            idx =random.choice(filled_indices)
+            occupied =set(pos for pos in new_chrom if pos is not None)
+            for _ in range(100):
+                new_pos =tuple(self._random_valid_position())
+                if new_pos not in occupied:
+                    new_chrom[idx] =new_pos
+                    break
+
+        elif op == "add":
+            idx =random.choice(empty_indices)
+            occupied =set(pos for pos in new_chrom if pos is not None)
+            for _ in range(100):
+                new_pos =tuple(self._random_valid_position())
+                if new_pos not in occupied:
+                    new_chrom[idx] = new_pos
+                    break
+
+        elif op == "remove":
+            idx =random.choice(filled_indices)
+            new_chrom[idx] =None
+
+        return self._repair(new_chrom)
+
+
