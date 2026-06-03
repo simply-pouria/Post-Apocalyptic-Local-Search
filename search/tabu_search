@@ -43,3 +43,11 @@ tuple(sorted(tuple(p) for p in nb))
                 neighbours.append(nb)
 
         return neighbours
+
+    def run(self, initial_state, **kwargs):
+        max_iterations =int(kwargs.get("max_iterations",         self.DEFAULT_MAX_ITER))
+        tabu_tenure =int(kwargs.get("tabu_tenure",            self.DEFAULT_TABU_TENURE))
+        neighbors_per_iter =int(kwargs.get("neighbors_per_iter",     self.DEFAULT_NEIGHBORS_PER_ITER))
+        max_no_improve =int(kwargs.get("max_no_improve",         self.DEFAULT_MAX_NO_IMPROVE))
+        max_no_improve_restart =int(kwargs.get("max_no_improve_restart", self.DEFAULT_MAX_NO_IMPROVE_RESTART))
+
