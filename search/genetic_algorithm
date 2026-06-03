@@ -1,0 +1,21 @@
+import random
+from search.local_search_base import LocalSearchBase
+
+class GeneticAlgorithm(LocalSearchBase):
+    DEFAULT_POP_SIZE = 30
+    DEFAULT_MAX_GEN = 500
+    DEFAULT_CROSSOVER_RATE = 0.85
+    DEFAULT_MUTATION_RATE = 0.20
+    DEFAULT_TOURNAMENT_SIZE = 3
+    DEFAULT_ELITISM_COUNT = 2
+    DEFAULT_MAX_NO_IMPROVE = 100
+
+    def _encode(self, state):
+        max_sensors = self._get_max_sensors()
+        chrom = list(state[:max_sensors])
+        while len(chrom) < max_sensors:
+            chrom.append(None)
+        return chrom
+
+    def _decode(self, chrom):
+        return [pos for pos in chrom if pos is not None]
