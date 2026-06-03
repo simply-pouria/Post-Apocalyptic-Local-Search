@@ -1,3 +1,5 @@
+import random
+
 from search.local_search_base import LocalSearchBase
 
 
@@ -51,3 +53,15 @@ tuple(sorted(tuple(p) for p in nb))
         max_no_improve =int(kwargs.get("max_no_improve",         self.DEFAULT_MAX_NO_IMPROVE))
         max_no_improve_restart =int(kwargs.get("max_no_improve_restart", self.DEFAULT_MAX_NO_IMPROVE_RESTART))
 
+        current_state =list(initial_state) if initial_state is not None else self.initialize_state()
+        current_cost  =self.evaluate(current_state)
+
+        best_state =list(current_state)
+        best_cost  =current_cost
+
+        evaluations: list =[current_cost]
+        states_history: list =[list(current_state)]
+
+        tabu_list: dict ={}
+        no_improve_count =0
+        no_improve_restart_count =0
