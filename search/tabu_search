@@ -38,8 +38,7 @@ class TabuSearch(LocalSearchBase):
             if len(neighbours) >= n:
                 break
             nb =self.get_neighbor(state)
-            nb_key =
-tuple(sorted(tuple(p) for p in nb))
+            nb_key = tuple(sorted(tuple(p) for p in nb))
             if nb_key not in seen_keys:
                 seen_keys.add(nb_key)
                 neighbours.append(nb)
